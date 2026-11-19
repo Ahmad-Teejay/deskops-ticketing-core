@@ -1,8 +1,33 @@
 services:
   backend:
+    env_file:
+      - ./backend/.env
     build:
       context: ./backend
     ports:
       - "8081:8080"
     environment:
       PORT: "8080"
+      DATABASE_URL: "postgresql://deskops:dev_only_password@db:5432/deskops?schema=public"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: deskops
+      POSTGRES_USER: deskops
+      POSTGRES_PASSWORD: dev_only_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U deskops -d deskops"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
