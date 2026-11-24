@@ -61,4 +61,4 @@ jobs:
         working-directory: backend
 
       - name: Build Docker image
-        run: docker build -t logicveda-ticketing-system-backend ./backend
+        run: docker build -t deskops-ticketing-core-backend ./backend
