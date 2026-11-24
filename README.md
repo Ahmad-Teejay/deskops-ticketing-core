@@ -1,4 +1,4 @@
-# LogicVeda Ticketing System
+# DeskOps — Phase 1: Ticketing Core
 
 This is our team project for LogicVeda Phase 1. Follow these steps to download the project onto a Windows computer and start the backend using Docker.
 
@@ -9,7 +9,7 @@ Install these programs first:
 1. **Git for Windows** — downloads the project from GitHub.  
    [Download Git](https://git-scm.com/download/win)
 
-2. **Docker Desktop** — builds and runs the project in a container.  
+2. **Docker Desktop** — builds and runs the project in containers.
    [Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
 3. **Visual Studio Code** — recommended for opening and editing the project.  
@@ -21,7 +21,7 @@ After installing Docker Desktop, open it and wait for it to finish starting.
 
 Click this link to open our team project on GitHub:
 
-[https://github.com/Ahmad-Teejay/logicveda-ticketing-system](https://github.com/Ahmad-Teejay/logicveda-ticketing-system)
+[DeskOps Ticketing Core repository](https://github.com/Ahmad-Teejay/deskops-ticketing-core)
 
 ## Step 2: Open PowerShell
 
@@ -42,10 +42,10 @@ cd $HOME\Documents
 Copy and run:
 
 ```powershell
-git clone https://github.com/Ahmad-Teejay/logicveda-ticketing-system.git
+git clone https://github.com/Ahmad-Teejay/deskops-ticketing-core.git
 ```
 
-**Clone** means downloading a copy of the repository onto your computer. Git creates a folder named `logicveda-ticketing-system`.
+**Clone** means downloading a copy of the repository onto your computer. Git creates a folder named `deskops-ticketing-core`.
 
 If PowerShell says `git` is not recognized, install Git for Windows, close PowerShell, open it again, and retry.
 
@@ -54,7 +54,7 @@ If PowerShell says `git` is not recognized, install Git for Windows, close Power
 Run:
 
 ```powershell
-cd logicveda-ticketing-system
+cd deskops-ticketing-core
 ```
 
 You are now inside the project folder. Run the Docker commands below from here.
@@ -71,7 +71,7 @@ If PowerShell says `code` is not recognized:
 
 1. Open Visual Studio Code.
 2. Select **File > Open Folder**.
-3. Open the `logicveda-ticketing-system` folder inside Documents.
+3. Open the `deskops-ticketing-core` folder inside Documents.
 
 ## Step 7: Start the backend with Docker
 
@@ -81,7 +81,7 @@ Make sure Docker Desktop is open and running. In PowerShell, run:
 docker compose up --build
 ```
 
-This command builds the backend image and starts the backend container. The first run may take a few minutes while Docker downloads and builds the required components.
+This command builds the backend image and starts the backend and database containers. The first run may take a few minutes while Docker downloads and builds the required components.
 
 Keep this PowerShell window open while the backend is running. You should see a message that the server is running.
 
@@ -137,7 +137,7 @@ git switch main
 git pull
 ```
 
-Create a separate branch for your assigned task. Replace `short-task-name` with a short description:
+Create a separate branch for your assigned task. Replace `short-task-name` with a short description of your work:
 
 ```powershell
 git switch -c feature/short-task-name
@@ -194,7 +194,6 @@ git push -u origin feature/short-task-name
 
 A pull request lets teammates review your work before it is added to the shared `main` branch.
 
-
 ## Backend CI checks
 
 The GitHub Actions workflow is in `.github/workflows/backend-ci.yml`. It runs automatically when someone pushes to `main` or opens a pull request targeting `main`.
@@ -209,5 +208,5 @@ From the project folder, open PowerShell and run:
 cd backend
 npm ci
 npm run typecheck
-docker build -t deskops-backend .
+docker build -t deskops-ticketing-core-backend .
 ```
