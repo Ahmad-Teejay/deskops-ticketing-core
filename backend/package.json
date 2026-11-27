@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "tsx --test src/routes/tickets.test.ts",
+    "test": "tsx --test src/routes/tickets.test.ts src/services/ticketTransitions.test.ts",
     "dev": "tsx watch src/index.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -20,7 +20,8 @@
     "express": "^5.3.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.1",
-    "zend": "^0.0.1"
+    "zend": "^0.0.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

@@ -1,0 +1,27 @@
+export type TicketState =
+  | 'NEW'
+  | 'TRIAGED'
+  | 'ASSIGNED'
+  | 'IN_PROGRESS'
+  | 'ON_HOLD'
+  | 'RESOLVED'
+  | 'CLOSED';
+
+export const transitions: Readonly<
+  Record<TicketState, Readonly<Record<string, TicketState>>>
+> = {
+  NEW: { triage: 'TRIAGED' },
+  TRIAGED: { assign: 'ASSIGNED' },
+  ASSIGNED: { unassign: 'TRIAGED', start: 'IN_PROGRESS' },
+  IN_PROGRESS: { hold: 'ON_HOLD', resolve: 'RESOLVED' },
+  ON_HOLD: { resume: 'IN_PROGRESS' },
+  RESOLVED: { close: 'CLOSED', reopen: 'ASSIGNED'}, 
+  CLOSED: { reopen: 'ASSIGNED' }, 
+};
+
+export function getNextState(
+  from: TicketState,
+  action: string,
+): TicketState | null {
+  return transitions[from][action] ?? null;
+}
