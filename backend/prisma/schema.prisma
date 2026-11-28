@@ -60,6 +60,7 @@ model Ticket {
   version        Int          @default(0)
   resolvedAt     DateTime?
   isBlocking     Boolean      @default(false)
+  comments       Comment[]
   customFields   Json?
   mergedIntoId   String?
   createdAt      DateTime     @default(now())
@@ -68,4 +69,24 @@ model Ticket {
 
   @@index([organisationId, status])
   @@index([organisationId, assigneeId])
+}
+
+enum CommentVisibility {
+  INTERNAL
+  PUBLIC
+}
+
+model Comment {
+  id             String            @id @default(uuid())
+  organisationId String
+  ticketId       String
+  authorId       String
+  visibility     CommentVisibility
+  body           String
+  createdAt      DateTime          @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id])
+
+  @@index([ticketId, createdAt])
+  @@index([organisationId])
 }
