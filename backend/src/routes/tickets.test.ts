@@ -14,13 +14,15 @@ let organisationBId = '';
 let ticketBId = '';
 let legalTicketId = '';
 let illegalTicketId = '';
+let forbiddenTicketId = '';
 let userAId = '';
 let emailA = '';
+let emailResident = '';
 
-async function loginAsOrgA(): Promise<string> {
+async function loginAsOrgA(email: string = emailA): Promise<string> {
   const login = await request(app)
     .post('/api/v1/auth/login')
-    .send({ email: emailA, password });
+    .send({ email, password });
 
   assert.equal(login.status, 200);
   assert.equal(typeof login.body.token, 'string');
@@ -47,6 +49,18 @@ describe('ticket API behavior', () => {
       },
     });
     organisationAId = organisationA.id;
+
+    emailResident = `resident-${suffix}@example.test`;
+    await prisma.user.create({
+      data: {
+        organisationId: organisationAId,
+        email: emailResident,
+        passwordHash: await bcrypt.hash(password, 10),
+        role: 'RESIDENT',
+        name: 'Org A test resident',
+        skills: [],
+      },
+    });
 
     const userA = await prisma.user.findUniqueOrThrow({
       where: { email: emailA },
@@ -83,6 +97,18 @@ describe('ticket API behavior', () => {
     });
     illegalTicketId = illegalTicket.id;
 
+    const forbiddenTicket = await prisma.ticket.create({
+      data: {
+        organisationId: organisationAId,
+        propertyId: 'property-a',
+        unitId: 'unit-a',
+        residentId: 'resident-a',
+        title: 'Ticket for forbidden transition',
+        description: 'Created for the role permission test',
+      },
+    });
+    forbiddenTicketId = forbiddenTicket.id;
+
     const ticketB = await prisma.ticket.create({
       data: {
         organisationId: organisationBId,
@@ -97,9 +123,12 @@ describe('ticket API behavior', () => {
   });
 
   after(async () => {
-    const ticketIds = [ticketBId, legalTicketId, illegalTicketId].filter(
-      (id) => id !== '',
-    );
+    const ticketIds = [
+      ticketBId,
+      legalTicketId,
+      illegalTicketId,
+      forbiddenTicketId,
+    ].filter((id) => id !== '');
 
     if (ticketIds.length > 0) {
       await prisma.ticketEvent.deleteMany({
@@ -180,6 +209,29 @@ describe('ticket API behavior', () => {
     });
     const events = await prisma.ticketEvent.findMany({
       where: { ticketId: illegalTicketId },
+    });
+
+    assert.equal(ticket.status, 'NEW');
+    assert.equal(events.length, 0);
+  });
+
+  it('denies a resident an otherwise legal transition without writing to the database', async () => {
+    const token = await loginAsOrgA(emailResident);
+
+    const response = await request(app)
+      .post(`/api/v1/tickets/${forbiddenTicketId}/transitions`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ action: 'triage' });
+
+    assert.equal(response.status, 403);
+    assert.deepEqual(response.body, { error: 'FORBIDDEN' });
+
+    const ticket = await prisma.ticket.findUniqueOrThrow({
+      where: { id: forbiddenTicketId },
+      select: { status: true },
+    });
+    const events = await prisma.ticketEvent.findMany({
+      where: { ticketId: forbiddenTicketId },
     });
 
     assert.equal(ticket.status, 'NEW');

@@ -1,3 +1,5 @@
+import type { Role } from '../generated/prisma/enums';
+
 export type TicketState =
   | 'NEW'
   | 'TRIAGED'
@@ -15,8 +17,21 @@ export const transitions: Readonly<
   ASSIGNED: { unassign: 'TRIAGED', start: 'IN_PROGRESS' },
   IN_PROGRESS: { hold: 'ON_HOLD', resolve: 'RESOLVED' },
   ON_HOLD: { resume: 'IN_PROGRESS' },
-  RESOLVED: { close: 'CLOSED', reopen: 'ASSIGNED'}, 
-  CLOSED: { reopen: 'ASSIGNED' }, 
+  RESOLVED: { close: 'CLOSED', reopen: 'ASSIGNED' },
+  CLOSED: { reopen: 'ASSIGNED' },
+};
+
+const roleActions: Readonly<Record<Role, readonly string[]>> = {
+  ADMIN: Array.from(
+    new Set(
+      Object.values(transitions).flatMap((stateTransitions) =>
+        Object.keys(stateTransitions),
+      ),
+    ),
+  ),
+  DISPATCHER: ['triage', 'assign', 'unassign', 'close', 'reopen'],
+  TECHNICIAN: ['start', 'hold', 'resolve', 'resume'],
+  RESIDENT: [],
 };
 
 export function getNextState(
@@ -24,4 +39,8 @@ export function getNextState(
   action: string,
 ): TicketState | null {
   return transitions[from][action] ?? null;
+}
+
+export function canRolePerformAction(role: Role, action: string): boolean {
+  return roleActions[role].includes(action);
 }

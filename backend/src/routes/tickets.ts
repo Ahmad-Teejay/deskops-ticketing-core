@@ -91,6 +91,11 @@ router.post(
       return;
     }
 
+    if (result.kind === 'FORBIDDEN') {
+      res.status(403).json({ error: 'FORBIDDEN' });
+      return;
+    }
+
     res.status(200).json(result);
   },
 );

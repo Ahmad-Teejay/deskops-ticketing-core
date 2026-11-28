@@ -1,6 +1,6 @@
 import type { Role, TicketStatus } from '../generated/prisma/enums';
 import { prisma } from '../db';
-import { getNextState } from './ticketTransitions';
+import { canRolePerformAction, getNextState } from './ticketTransitions';
 
 type TransitionTicketInput = {
   ticketId: string;
@@ -13,6 +13,7 @@ type TransitionTicketInput = {
 export type TransitionTicketResult =
   | { kind: 'NOT_FOUND' }
   | { kind: 'ILLEGAL_TRANSITION' }
+  | { kind: 'FORBIDDEN' }
   | {
       kind: 'TRANSITIONED';
       ticket: {
@@ -58,6 +59,10 @@ export function transitionTicket(
 
     if (!toStatus) {
       return { kind: 'ILLEGAL_TRANSITION' };
+    }
+
+    if (!canRolePerformAction(input.actorRole, input.action)) {
+      return { kind: 'FORBIDDEN' };
     }
 
     const updatedTicket = await transaction.ticket.update({
